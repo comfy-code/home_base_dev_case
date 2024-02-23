@@ -84,7 +84,7 @@ export default function Providers({ providers }) {
                 </div>
 
                 <div className={`flex flex-col gap-2`}>
-                  <h1 className={`font-bold text-2;'/xl`}>{x.name} </h1>
+                  <h1 className={`font-bold text-xl`}>{x.name} </h1>
                   <div className={`flex flex-col gap-2 sm:flex-row`}>
                     <div className={`flex gap-2`}>
                       {Stars(x.review_score, x.slug)}
