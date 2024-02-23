@@ -1,118 +1,333 @@
-import Image from "next/image";
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
+import { getData } from "../data.js";
+
+import { useState, useRef, useEffect } from "react";
+
+import pro from "../styles/pro.module.css";
+
+import Caret from "../../public/components/icons/Caret.js";
+
+import Providers from "../../public/components/Providers.js";
+
+export async function getServerSideProps() {
+  const companies = await getData();
+
+  return { props: { companies } };
+}
+
+export default function Home({ companies }) {
+  const [providers, setProviders] = useState(companies);
+  const [filteredProviders, setFiltered] = useState([]);
+  const [cate, setCate] = useState(() => {
+    const categories = [];
+    for (let i = 0; i < providers.length; i++) {
+      for (let m = 0; m < providers[i].services.length; m++) {
+        if (!categories.includes(providers[i].services[m])) {
+          categories.push(providers[i].services[m]);
+        }
+      }
+    }
+    return categories;
+  });
+
+  //state control open/close of filters
+  const [open, setOpen] = useState(false);
+  const [open1, setOpen1] = useState(false);
+  const [open2, setOpen2] = useState(false);
+
+  //state hold filter selection
+  const [ratingFilter, setRatingFilter] = useState("");
+  const [serviceFilter, setServiceFilter] = useState("");
+  const [distanceFilter, setDistanceFilter] = useState("");
+
+  // handle outside clicks
+  const newRef = useRef(null);
+  const newRef1 = useRef(null);
+  const newRef2 = useRef(null);
+
+  const handleOutsideClick = (e) => {
+    if (newRef.current && !newRef.current.contains(e.target)) {
+      setOpen(false);
+    }
+
+    if (newRef1.current && !newRef1.current.contains(e.target)) {
+      setOpen1(false);
+    }
+
+    if (newRef2.current && !newRef2.current.contains(e.target)) {
+      setOpen2(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", handleOutsideClick);
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  });
+
+  //filtering
+  const ratingChange = (e) => {
+    setRatingFilter(parseInt(e.target.value));
+    setOpen(false);
+  };
+
+  const filterByRating = (arr) => {
+    return ratingFilter !== ""
+      ? arr.filter((x) => Math.floor(x.review_score) === ratingFilter)
+      : arr;
+  };
+
+  const filterByService = (arr) => {
+    return serviceFilter !== ""
+      ? arr.filter((x) => x.services.includes(serviceFilter))
+      : arr;
+  };
+
+  const filterByDitance = (arr) => {
+    return distanceFilter !== ""
+      ? arr.filter((x) => x.distance < distanceFilter)
+      : arr;
+  };
+
+  useEffect(() => {
+    let res = companies;
+    res = filterByRating(res);
+    res = filterByService(res);
+    res = filterByDitance(res);
+
+    setProviders(res);
+  }, [ratingFilter, serviceFilter, distanceFilter]);
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main>
+      <div className={`p-2 lg:flex lg:justify-end lg:gap-2`}>
+        <div
+          className={`${pro.customSelect} ${open ? pro.active : null} `}
+          ref={newRef}
+        >
+          <button
+            className={`${pro.selectButton} font-semibold lg:gap-4`}
+            role="combobox"
+            aria-labelledby="select button"
+            aria-haspopup="listbox"
+            aria-expanded={false}
+            aria-controls="select-dropdown"
+            onClick={() => {
+              setOpen(!open);
+            }}
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            <span className={pro.selectedValue}>
+              {" "}
+              {ratingFilter !== ""
+                ? ratingFilter + " Stars"
+                : "STAR RATING"}{" "}
+            </span>
+            <span className={pro.arrow}>
+              <Caret />
+            </span>
+          </button>
+          <ul
+            role="listbox"
+            id="select-dropdown"
+            className={`${pro.selectDropdown} relative lg:absolute`}
+          >
+            <li>
+              <input
+                type="radio"
+                id="five"
+                value={5}
+                name="rating"
+                onClick={(e) => ratingChange(e)}
+              />
+              <label htmlFor="five"> 5 Stars </label>
+            </li>
+            <li>
+              <input
+                type="radio"
+                id="four"
+                value={4}
+                name="rating"
+                onClick={ratingChange}
+              />
+              <label htmlFor="four"> 4 Stars </label>
+            </li>
+            <li>
+              <input
+                type="radio"
+                id="three"
+                value={3}
+                name="rating"
+                onClick={ratingChange}
+              />
+              <label htmlFor="three"> 3 Stars </label>
+            </li>
+            <li>
+              <input
+                type="radio"
+                id="two"
+                value={2}
+                name="rating"
+                onClick={ratingChange}
+              />
+              <label htmlFor="two"> 2 Stars </label>
+            </li>
+            <li>
+              <input
+                type="radio"
+                id="one"
+                value={1}
+                name="rating"
+                onClick={ratingChange}
+              />
+              <label htmlFor="one"> 1 Star </label>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          className={`${pro.customSelect} ${open1 ? pro.active : null}`}
+          ref={newRef1}
+        >
+          <button
+            className={`${pro.selectButton} font-semibold lg:gap-4`}
+            role="combobox"
+            aria-labelledby="select button"
+            aria-haspopup="listbox"
+            aria-expanded={false}
+            aria-controls="select-dropdown"
+            onClick={() => setOpen1(!open1)}
+          >
+            <span className={pro.selectedValue}>
+              {serviceFilter !== "" ? serviceFilter : "SERVICES OFFERED"}{" "}
+            </span>
+            <span className={pro.arrow}>
+              <Caret />
+            </span>
+          </button>
+          <ul
+            role="listbox"
+            id="select-dropdown"
+            className={`${pro.selectDropdown} relative lg:absolute`}
+          >
+            {cate
+              ? cate.map((x, i) => {
+                  return (
+                    <li key={i}>
+                      <input
+                        type="radio"
+                        id={i}
+                        value={x}
+                        name="service"
+                        onClick={(e) => {
+                          setServiceFilter(e.target.value);
+                          setOpen1(false);
+                        }}
+                      />
+                      <label htmlFor={i}> {x} </label>
+                    </li>
+                  );
+                })
+              : null}
+          </ul>
+        </div>
+
+        <div
+          className={`${pro.customSelect} ${open2 ? pro.active : null}`}
+          ref={newRef2}
+        >
+          <button
+            className={`${pro.selectButton} font-semibold lg:gap-4`}
+            role="combobox"
+            aria-labelledby="select button"
+            aria-haspopup="listbox"
+            aria-expanded={false}
+            aria-controls="select-dropdown"
+            onClick={() => setOpen2(!open2)}
+          >
+            <span className={pro.selectedValue}>
+              {distanceFilter !== ""
+                ? "within " + distanceFilter + " miles"
+                : "DISTANCE"}
+            </span>
+            <span className={pro.arrow}>
+              <Caret />
+            </span>
+          </button>
+          <ul
+            role="listbox"
+            id="select-dropdown"
+            className={`${pro.selectDropdown} relative lg:absolute`}
+          >
+            <li>
+              <input
+                type="radio"
+                id="5m"
+                value={5}
+                onClick={(e) => {
+                  setDistanceFilter(e.target.value);
+                  setOpen2(false);
+                }}
+                name="distance"
+              />
+              <label htmlFor="5m">within 5 Miles </label>
+            </li>
+            <li>
+              <input
+                type="radio"
+                id="15m"
+                value={15}
+                name="distance"
+                onClick={(e) => {
+                  setDistanceFilter(e.target.value);
+                  setOpen2(false);
+                }}
+              />
+              <label htmlFor="15m"> within 15 Miles </label>
+            </li>
+            <li>
+              <input
+                type="radio"
+                id="60m"
+                value={60}
+                name="distance"
+                onClick={(e) => {
+                  setDistanceFilter(e.target.value);
+                  setOpen2(false);
+                }}
+              />
+              <label htmlFor="60m"> within 60 miles </label>
+            </li>
+          </ul>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      {ratingFilter !== "" || serviceFilter !== "" || distanceFilter !== "" ? (
+        <div className={`flex justify-end p-2`}>
+          {" "}
+          <button
+            style={{
+              backgroundColor: "red",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              padding: "1%",
+            }}
+            onClick={() => {
+              setRatingFilter("");
+              setDistanceFilter("");
+              setServiceFilter("");
+              setProviders(companies);
+            }}
+          >
+            {" "}
+            Clear Filters{" "}
+          </button>
+        </div>
+      ) : null}
+      <Providers providers={providers} />
     </main>
   );
 }

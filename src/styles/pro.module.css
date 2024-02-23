@@ -1,0 +1,193 @@
+.customSelect {
+  position: relative;
+  /* width: 30%; */
+  max-width: 100%;
+  font-size: 1.15rem;
+  color: black;
+}
+
+.selectButton {
+  width: 100%;
+  font-size: 1rem;
+  background-color: #fff;
+  padding: 0.675em 1em;
+  border: 1px solid #caced1;
+  border-radius: 0.25rem;
+  cursor: pointer;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.selectedValue {
+  text-align: left;
+}
+
+.arrow {
+  transition: transform ease-in-out 0.3s;
+}
+
+.selectDropdown {
+  list-style: none;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  border: 1px solid #caced1;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 5px 0 10px 0;
+  max-height: 200px;
+  overflow-y: auto;
+  transition: 0.5s ease;
+
+  transform: scaleY(0);
+  opacity: 0;
+  visibility: hidden;
+  height: 0;
+  z-index: 3;
+}
+
+.selectDropdown:focus-within {
+  box-shadow: 0 10px 25px rgba(94, 108, 233, 0.6);
+}
+
+.selectDropdown li {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.selectDropdown li label {
+  width: 100%;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.selectDropdown::-webkit-scrollbar {
+  width: 7px;
+}
+
+.selectDropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 25px;
+}
+
+.selectDropdown::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 25px;
+}
+
+.selectDropdown li:hover {
+  background-color: #f2f2f2;
+}
+
+.selectDropdown input:focus ~ label {
+  background-color: #dfdfdf;
+}
+
+.selectDropdown input[type="radio"] {
+  position: absolute;
+  left: 0;
+  opacity: 0;
+}
+
+.customSelect.active .arrow {
+  transform: rotate(180deg);
+}
+
+.customSelect.active .selectDropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: scaleY(1);
+  height: auto;
+}
+
+/* tooltip */
+
+.tooltip {
+  position: relative;
+  cursor: pointer;
+}
+
+.tooltip:hover .tooltipText {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltipText {
+  font-size: 14px;
+
+  position: absolute;
+  width: 300px;
+  left: 35px;
+  top: -40%;
+  margin-bottom: 15px;
+  border: 2px solid rgb(132 204 22);
+  box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
+  border-radius: 3px;
+  padding: 5px;
+  text-align: center;
+  z-index: 5;
+  background: white;
+  transition: 0.5s ease-in;
+  opacity: 0;
+
+  visibility: hidden;
+}
+
+.tooltipText:after,
+.tooltipText:before {
+  content: "";
+  position: absolute;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  top: 10%;
+  left: -2%;
+  margin-left: -10px;
+}
+
+.tooltipText:before {
+  border-right: 10px solid rgb(132 204 22);
+  margin-left: -5px;
+}
+
+.tooltipText:after {
+  border-right: 10px solid white;
+  margin-left: -2px;
+  z-index: 1;
+}
+
+@media screen and (max-width: 640px) {
+  .tooltipText {
+    position: absolute;
+    width: 300px;
+    left: -150px;
+    top: 100%;
+    margin-bottom: 15px;
+    background: white;
+
+    display: none;
+  }
+
+  .seeTool {
+    display: block;
+  }
+
+  .tooltipText:before {
+    border: none;
+  }
+
+  .tooltipText:after {
+    border: none;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .tooltipText {
+    width: 280px;
+    left: -67vw;
+  }
+}
